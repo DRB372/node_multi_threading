@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+  postgres:
+    build: backend/postgres-dev/
+    container_name: postgres
+    ports:
+      - 5432:5432
+    restart: always
+    volumes:
+      - ./backend/db_data/:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+      POSTGRES_DB_LIST: $POSTGRES_DATABASE_LIST
+      POSTGRES_USER: $POSTGRES_USERNAME
+
+  adminer:
+    image: adminer
+    container_name: adminer
+    restart: always
+    ports:
+      - $MACHINE_ADMINER_PORT:$ADMINER_PORT
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+
+  multi_threading:
+    build: backend/multi_threading/
+    container_name: multi_threading
+    command: sh ./docker-entrypoint.sh
+    hostname: $MULTI_THREADING_HOSTNAME
+    restart: always
+    ports:
+      - $MULTI_THREADING_PORT:$MULTI_THREADING_PORT
+    depends_on:
+      - postgres
+    environment:
+      POSTGRES_USERNAME: $POSTGRES_USERNAME
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+      POSTGRES_HOST: postgres
+      POSTGRES_DATABASE: $MULTI_THREADING_DB
